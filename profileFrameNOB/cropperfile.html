@@ -1,0 +1,104 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Cropper.js</title>
+  <link rel="stylesheet" href="../css/cropper.css">
+  <style>
+    .container {
+      margin: 20px auto;
+      max-width: 640px;
+    }
+
+    img {
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Cropper with a range of aspect ratio</h1>
+    <div id="canvascontainer" style="">
+        <button id="conindiv" style="">
+            <p>
+                Click Here to Upload image
+            </p>
+        </button>
+        <div id="preview"></div>
+  </div>
+
+  <script src="../js/cropper.js"></script>
+  <script>
+      document.getElementById('dwnbtn').style.display='none'
+        document.getElementById('preview').style.display='none'
+        frmbtn=document.getElementById('frambtn')
+        frmbtn.style.display='none'
+        var fil,nwfil
+        imtop=new Image()
+        imtop.src="frame01.png"
+        const canvas = document.getElementById('maincanvas');
+        const ctx = canvas.getContext('2d');
+        const image = document.getElementById('source');
+        imcon = document.getElementById("conindiv")
+        dpi = window.devicePixelRatio;
+        // imcon2=document.getElementById("conindiv")
+
+        imcon.addEventListener('click',function(){
+            nwfil= document.createElement("input")
+            nwfil.type="file"
+            nwfil.click()
+            nwfil.addEventListener('change',function(){
+                im=new Image()
+
+                im.src= URL.createObjectURL(nwfil.files[0] )
+                im.id='createdimg'
+                im.style.width='40%'
+                im.style.height='auto'
+                im.style.margin='15px'
+                imcon.style.display='none'
+                document.getElementById('preview').appendChild(im)
+                document.getElementById('preview').style.display='block'
+                frmbtn.style.display='block'
+
+            })
+        })
+    window.addEventListener('DOMContentLoaded', function () {
+      var image = document.querySelector('#image');
+      var minAspectRatio = 0.5;
+      var maxAspectRatio = 1.5;
+      var cropper = new Cropper(image, {
+        ready: function () {
+          var cropper = this.cropper;
+          var containerData = cropper.getContainerData();
+          var cropBoxData = cropper.getCropBoxData();
+          var aspectRatio = cropBoxData.width / cropBoxData.height;
+          var newCropBoxWidth;
+
+          if (aspectRatio < minAspectRatio || aspectRatio > maxAspectRatio) {
+            newCropBoxWidth = cropBoxData.height * ((minAspectRatio + maxAspectRatio) / 2);
+
+            cropper.setCropBoxData({
+              left: (containerData.width - newCropBoxWidth) / 2,
+              width: newCropBoxWidth
+            });
+          }
+        },
+
+        cropmove: function () {
+          var cropper = this.cropper;
+          var cropBoxData = cropper.getCropBoxData();
+          var aspectRatio = cropBoxData.width / cropBoxData.height;
+
+          if (aspectRatio < minAspectRatio) {
+            cropper.setCropBoxData({
+              width: cropBoxData.height * minAspectRatio
+            });
+          } else if (aspectRatio > maxAspectRatio) {
+            cropper.setCropBoxData({
+              width: cropBoxData.height * maxAspectRatio
+            });
+          }
+        },
+      });
+    });

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PROFILEIM</title>
+<!--PASTE THIS ON THE HEAD OF YOUR HTML MAIN PAGE   -->
+  <style>
+      #canvascontainer div p{
+          font-family: "Courier New", Courier, monospace;
+          font-size: 20px;
+            word-spacing: 2px;
+          color: #D6D6D6;
+          font-weight:100;
+          text-decoration: none;
+          font-style: italic;
+          font-variant: normal;
+          text-transform: none;
+          text-align: center;
+          padding-top: 30px;
+
+
+          cursor: pointer;
+      }
+      .button {
+          display: inline-block;
+          border-radius: 4px;
+          background-color: #f4511e;
+          border: none;
+          color: #FFFFFF;
+          text-align: center;
+          font-size:12px;
+          padding: 10px;
+          width: 150px;
+          transition: all 0.5s;
+          cursor: pointer;
+          margin: 5px;
+      }
+
+      .button span {
+          cursor: pointer;
+          display: inline-block;
+          position: relative;
+          transition: 0.5s;
+      }
+
+      .button span:after {
+          content: '\00bb';
+          position: absolute;
+          opacity: 0;
+          top: 0;
+          right: -20px;
+          transition: 0.5s;
+      }
+
+      .button:hover span {
+          padding-right: 25px;
+      }
+
+      .button:hover span:after {
+          opacity: 1;
+          right: 0;
+      }
+     button#conindiv{
+        background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 16px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 8px;
+  margin: 4px 2px;
+  -webkit-transition-duration: 0.4s; /* Safari */
+  transition-duration: 0.4s;
+  cursor: pointer;
+
+   background-color: white; 
+  color: black; 
+  border: 0.5px solid #008CBA;
+      }
+
+  </style>
+
+
+</head>
+<body>
+<!--PASTE THIS DIV AND ALL IT'S CONTENT WHERE  YOU WANT THE IMAGE TO SHOW   -->
+<div id="divbody" style="margin:5px;padding:6px ">
+
+    <div id="canvascontainer" >
+        <button id="conindiv" >
+            <p>
+                Click Here to Upload image
+            </p>
+        </button>
+        <div id="preview"></div>
+        <button class="button" id="frambtn" style="vertical-align:middle"><span>Create frame </span></button>
+    </div><br>
+    <div>
+
+        <canvas id="maincanvas" style="">
+
+        </canvas>
+        <button class="button" id="dwnbtn" style="vertical-align:middle"><span>Download </span></button>
+    </div>
+  
+    <script>
+
+        document.getElementById('dwnbtn').style.display='none'
+        document.getElementById('preview').style.display='none'
+        frmbtn=document.getElementById('frambtn')
+        frmbtn.style.display='none'
+        var fil,nwfil
+        imtop=new Image()
+        imtop.src="frame01.png"
+        const canvas = document.getElementById('maincanvas');
+        const ctx = canvas.getContext('2d');
+        const image = document.getElementById('source');
+        imcon = document.getElementById("conindiv")
+        dpi = window.devicePixelRatio;
+        // imcon2=document.getElementById("conindiv")
+
+        imcon.addEventListener('click',function(){
+            nwfil= document.createElement("input")
+            nwfil.type="file"
+            nwfil.click()
+            nwfil.addEventListener('change',function(){
+                im=new Image()
+
+                im.src= URL.createObjectURL(nwfil.files[0] )
+                im.id='createdimg'
+                im.style.width='300px'
+                im.style.height='300px'
+                //im.style.margin='15px'
+                imcon.style.display='none'
+                document.getElementById('preview').appendChild(im)
+                document.getElementById('preview').style.display='block'
+                frmbtn.style.display='block'
+
+            })
+        })
+
+        frmbtn.addEventListener('click',function(){
+            im.style,display='none'
+            imtop.style.width='inherit'
+            imtop.style.height='auto'
+
+            canvas.width=450
+            canvas.height=450
+
+            //fix_dpi();
+            imag= document.getElementById('createdimg')
+             ctx.drawImage(imag,0,0,450,450);
+            ctx.drawImage(imtop,0,0, 450,450);
+            document.getElementById('dwnbtn').style.display='block'
+            sharpen(ctx,300,420,0.52)
+           
+
+        })
+        function sharpen(ctx, w, h, mix) {
+            var x, sx, sy, r, g, b, a, dstOff, srcOff, wt, cx, cy, scy, scx,
+                    weights = [0, -1, 0, -1, 5, -1, 0, -1, 0],
+                    katet = Math.round(Math.sqrt(weights.length)),
+                    half = (katet * 0.5) | 0,
+                    dstData = ctx.createImageData(w, h),
+                    dstBuff = dstData.data,
+                    srcBuff = ctx.getImageData(0, 0, w, h).data,
+                    y = h;
+
+            while (y--) {
+                x = w;
+                while (x--) {
+                    sy = y;
+                    sx = x;
+                    dstOff = (y * w + x) * 4;
+                    r = 0;
+                    g = 0;
+                    b = 0;
+                    a = 0;
+
+                    for (cy = 0; cy < katet; cy++) {
+                        for (cx = 0; cx < katet; cx++) {
+                            scy = sy + cy - half;
+                            scx = sx + cx - half;
+
+                            if (scy >= 0 && scy < h && scx >= 0 && scx < w) {
+                                srcOff = (scy * w + scx) * 4;
+                                wt = weights[cy * katet + cx];
+
+                                r += srcBuff[srcOff] * wt;
+                                g += srcBuff[srcOff + 1] * wt;
+                                b += srcBuff[srcOff + 2] * wt;
+                                a += srcBuff[srcOff + 3] * wt;
+                            }
+                        }
+                    }
+
+                    dstBuff[dstOff] = r * mix + srcBuff[dstOff] * (1 - mix);
+                    dstBuff[dstOff + 1] = g * mix + srcBuff[dstOff + 1] * (1 - mix);
+                    dstBuff[dstOff + 2] = b * mix + srcBuff[dstOff + 2] * (1 - mix);
+                    dstBuff[dstOff + 3] = srcBuff[dstOff + 3];
+                }
+            }
+
+            ctx.putImageData(dstData, 0, 0);
+        }
+        document.getElementById('dwnbtn').onclick=function(){
+            // dwnim= new Image(350,250)
+            dwnim=canvas.toDataURL('image/jepg',1.0).replace('image/jepg','image/octet-stream')
+            link= document.createElement('a')
+            link.download='NOBframeImage.png'
+            link.href=dwnim
+            link.click()
+
+        }
+    </script>
+</div>
+
+
+</body>
+</html>
